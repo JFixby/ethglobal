@@ -1,39 +1,41 @@
 import json
 
-from hliq import get_current_funding, sort_by_value_desc
+from hliq import get_current_funding
 from kinch_get import get_pair
 from kinch_token_list import fetch_tokens
 
-def quote(token):
+
+def quote():
     tks = fetch_tokens()
-    print(json.dumps(tks, indent=4))
-    tk_1 = tks[token]
-    tk_2 = tks["USDT"]
-    price_usdt = get_pair(tk_1, tk_2)
+    #
+    RES = {}
+    for k, v in tks.items():
+        tk_1 = tks[k]
+        tk_2 = tks["USDT"]
+        price_usdt = get_pair(tk_1, tk_2)
 
-    rate = get_current_funding()
-    token_rate = rate[token]
+        rate = get_current_funding()
+        token_rate = rate.get(k, None)
+        if token_rate is None:
+            continue
 
-    result = {}
+        result = {}
 
-    result["simbol"] = token
-    result["market_price"] = price_usdt
-    result["funding"] = token_rate["funding"]
-    result["oracle_price"] = token_rate["oraclePx"]
+        result["simbol"] = k
+        result["market_price"] = price_usdt
+        result["funding"] = token_rate["funding"]
+        result["oracle_price"] = token_rate["oraclePx"]
 
-    return result
+        print(json.dumps(result, indent=4))
+
+        RES[k] = result
+
+    return RES
+
 
 if __name__ == "__main__":
-    token = "ETH"
-    qt  = quote(token)
+    qt = quote()
 
     print(json.dumps(qt, indent=4))
-    # rate = sort_by_value_desc(rate)
-    # print(json.dumps(rate, indent=2))
-
-
-
-
-
-
-
+# rate = sort_by_value_desc(rate)
+# print(json.dumps(rate, indent=2))

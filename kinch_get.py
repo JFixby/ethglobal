@@ -15,7 +15,7 @@ def get_pair(TK_1, TK_2):
 
     if response.status_code == 200:
         prices = response.json()
-        print(prices)
+        #print(prices)
 
         # Convert to lowercase to match JSON keys
         eth_key = TK_1.lower()
@@ -31,7 +31,11 @@ def get_pair(TK_1, TK_2):
 
 # Run it
 if __name__ == "__main__":
+    SYM = "ETH"
     tks = fetch_tokens()
-    tk_1 = tks["ETH"]
-    tk_2 = tks["USDT"]
-    get_pair(tk_1, tk_2)
+
+    for item in tks:
+        tk_1 = item[0]
+        tk_2 = tks["USDT"]
+        price = get_pair(tk_1, tk_2)
+        print(f"{SYM}: {price}USDT")
