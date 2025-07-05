@@ -34,8 +34,8 @@ if __name__ == "__main__":
     SYM = "ETH"
     tks = fetch_tokens()
 
-    for item in tks:
-        tk_1 = item[0]
+    for k in tks:
+        tk_1 = tks[k]
         tk_2 = tks["USDT"]
         price = get_pair(tk_1, tk_2)
-        print(f"{SYM}: {price}USDT")
+        print(f"{k}: {price}USDT")
