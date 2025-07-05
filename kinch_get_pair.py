@@ -31,11 +31,10 @@ def get_pair(TK_1, TK_2):
 
 # Run it
 if __name__ == "__main__":
-    SYM = "ETH"
     tks = fetch_tokens()
 
     for k in tks:
         tk_1 = tks[k]
         tk_2 = tks["USDT"]
         price = get_pair(tk_1, tk_2)
-        print(f"{k}: {price}USDT")
+        print(f"{k}: {price} USDT")

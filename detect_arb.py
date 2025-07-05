@@ -1,7 +1,7 @@
 import json
 
 from hliq import get_current_funding
-from kinch_get import get_pair
+from kinch_get_pair import get_pair
 from kinch_token_list import fetch_tokens
 
 
@@ -13,7 +13,7 @@ def quote():
     for k, v in tks.items():
         tk_1 = tks[k]
         tk_2 = tks["USDT"]
-        price_usdt = get_pair(tk_1, tk_2)
+        # price_usdt = get_pair(tk_1, tk_2)
 
 
         token_rate = rate.get(k, None)
@@ -23,7 +23,7 @@ def quote():
         result = {}
 
         result["simbol"] = k
-        result["market_price"] = price_usdt
+        # result["market_price"] = price_usdt
         result["funding"] = token_rate["funding"]
         result["oracle_price"] = token_rate["oraclePx"]
         result["token_rate"] = token_rate
