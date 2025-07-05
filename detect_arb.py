@@ -7,6 +7,7 @@ from kinch_token_list import fetch_tokens
 
 def quote():
     tks = fetch_tokens()
+    rate = get_current_funding()
     #
     RES = {}
     for k, v in tks.items():
@@ -14,7 +15,7 @@ def quote():
         tk_2 = tks["USDT"]
         price_usdt = get_pair(tk_1, tk_2)
 
-        rate = get_current_funding()
+
         token_rate = rate.get(k, None)
         if token_rate is None:
             continue
