@@ -4,8 +4,27 @@ import requests
 
 import K1inch
 
+
+def get_chain_id():
+    import requests
+
+    method = "get"
+    apiUrl = "https://api.1inch.dev/token/v1.3/multi-chain/supported-chains"
+    headers = {
+      "accept": "application/json",
+      "Authorization": f"Bearer {K1inch.API_KEY}"
+    }
+
+    response = requests.get(apiUrl, headers=headers)
+
+
+    print(response.json())
+
 def fetch_tokens():
-    CHAIN_ID = 1  # Ethereum Mainnet
+    get_chain_id()
+
+
+    CHAIN_ID = 42161  # Ethereum Mainnet
     BASE_URL = f"https://api.1inch.dev/swap/v5.2/{CHAIN_ID}"
     TOKEN_LIST_URL = f"{BASE_URL}/tokens"
 
