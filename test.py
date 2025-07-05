@@ -1,6 +1,6 @@
 import requests
 
-from hack import K1inch
+import K1inch
 
 # === Configuration ===
 ETH_ADDRESS = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"  # ETH (native)
