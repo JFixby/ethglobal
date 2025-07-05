@@ -24,7 +24,7 @@ def quote(token):
     return result
 
 if __name__ == "__main__":
-    token = "VVV"
+    token = "ETH"
     qt  = quote(token)
 
     print(json.dumps(qt, indent=4))

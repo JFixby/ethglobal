@@ -21,10 +21,7 @@ def get_chain_id():
     print(response.json())
 
 def fetch_tokens():
-    get_chain_id()
-
-
-    CHAIN_ID = 42161  # Ethereum Mainnet
+    CHAIN_ID = 1  # Ethereum Mainnet
     BASE_URL = f"https://api.1inch.dev/swap/v5.2/{CHAIN_ID}"
     TOKEN_LIST_URL = f"{BASE_URL}/tokens"
 
