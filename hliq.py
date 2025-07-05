@@ -32,12 +32,13 @@ def get_current_funding():
     # `meta["universe"]` and `asset_ctxs` share the same ordering.
     for idx, ctx in enumerate(asset_ctxs):
         coin = meta["universe"][idx]["name"].upper()
-        result[coin] = float(ctx["funding"])
+        result[coin] = ctx
 
     return result
 
 def sort_by_value_desc(d: dict) -> dict:
-    return dict(sorted(d.items(), key=lambda kv: abs(kv[1]), reverse=True))
+    # float(ctx["funding"])
+    return dict(sorted(d.items(), key=lambda kv: abs(float(kv[1]["funding"])), reverse=True))
 
 
 def print_funding():
