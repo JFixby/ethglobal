@@ -26,6 +26,7 @@ def quote():
         result["market_price"] = price_usdt
         result["funding"] = token_rate["funding"]
         result["oracle_price"] = token_rate["oraclePx"]
+        result["token_rate"] = token_rate
 
         print(json.dumps(result, indent=4))
 
