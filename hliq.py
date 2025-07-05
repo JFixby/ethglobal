@@ -24,8 +24,8 @@ def _post(payload: Dict) -> dict | list:
 def get_current_funding():
     """Return the *current* 8‑hour funding rate for ``symbol`` (e.g. "ETH")."""
     meta, asset_ctxs = _post({"type": "metaAndAssetCtxs"})
-    print(json.dumps(asset_ctxs, indent=2))
-    print(json.dumps(meta, indent=2))
+    # print(json.dumps(asset_ctxs, indent=2))
+    # print(json.dumps(meta, indent=2))
 
     result = {}
 
@@ -36,16 +36,18 @@ def get_current_funding():
 
     return result
 
+def sort_by_value_desc(d: dict) -> dict:
+    return dict(sorted(d.items(), key=lambda kv: abs(kv[1]), reverse=True))
 
 
-def print_funding(symbol = "ETH"):
+def print_funding():
     rate = get_current_funding()
+    rate = sort_by_value_desc(rate)
     print(json.dumps(rate, indent=2))
 
 
 def main() -> None:
-        print_funding("ETH")
-        print_funding("BTC")
+        print_funding()
 
 
 
