@@ -24,7 +24,7 @@ def quote():
 
         result["simbol"] = k
         # result["market_price"] = price_usdt
-        result["funding"] = token_rate["funding"]
+        result["funding"] = 100*float(token_rate["funding"])
         result["oracle_price"] = token_rate["oraclePx"]
         result["token_rate"] = token_rate
 
