@@ -35,7 +35,8 @@ class OneInchClient:
 
         for address, token in tokens.items():
             if token["symbol"].upper() == symbol.upper():
-                return address
+                checksum_address = Web3.to_checksum_address(address)
+                return checksum_address
         raise ValueError(f"Token symbol '{symbol}' not found")
 
     def get_quote(self, from_token, to_token, amount_wei):
@@ -53,8 +54,8 @@ class OneInchClient:
     def build_swap_tx(self, from_token, to_token, amount_wei):
         url = f"{self.base_url}/swap"
         params = {
-            "fromTokenAddress": from_token,
-            "toTokenAddress": to_token,
+            "fromTokenAddress": Web3.to_checksum_address(from_token),
+            "toTokenAddress": Web3.to_checksum_address(to_token),
             "amount": str(amount_wei),
             "fromAddress": self.account.address,
             "slippage": 1,
@@ -66,12 +67,17 @@ class OneInchClient:
         return response.json()["tx"]
 
     def send_transaction(self, tx_data):
+        tx_data["from"] = Web3.to_checksum_address(tx_data["from"])
+        tx_data["to"] = Web3.to_checksum_address(tx_data["to"])
         tx_data["nonce"] = self.web3.eth.get_transaction_count(self.account.address)
         tx_data["gasPrice"] = self.web3.eth.gas_price
+        tx_data["value"] = int(tx_data["value"])
         tx_data["gas"] = int(tx_data.get("gas", 250000))  # Default fallback
 
         signed_tx = self.account.sign_transaction(tx_data)
-        tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        print("Transaction data:")
+        print(json.dumps(tx_data, indent=4))
+        tx_hash = self.web3.eth.send_raw_transaction(signed_tx.raw_transaction)
         return self.web3.to_hex(tx_hash)
 
 
@@ -86,21 +92,21 @@ if __name__ == "__main__":
     to_symbol = "USDC"
     amount_matic = 1
 
-    try:
-        from_token = client.get_token_address(from_symbol)
-        to_token = client.get_token_address(to_symbol)
-        amount_wei = Web3.to_wei(amount_matic, 'ether')
+    from_token = client.get_token_address(from_symbol)
+    to_token = client.get_token_address(to_symbol)
+    amount_wei = Web3.to_wei(amount_matic, 'ether')
 
-        quote = client.get_quote(from_token, to_token, amount_wei)
-        print("Quote received:")
-        print(quote)
+    quote = client.get_quote(from_token, to_token, amount_wei)
+    print("Quote received:")
+    print(quote)
 
-        tx_data = client.build_swap_tx(from_token, to_token, amount_wei)
-        print("Transaction data:")
-        print(json.dumps(tx_data,indent=4))
+    tx_data = client.build_swap_tx(from_token, to_token, amount_wei)
 
-        tx_hash = client.send_transaction(tx_data)
-        print(f"Transaction sent! Hash: {tx_hash}")
 
-    except Exception as e:
-        print("Error:", e)
+    tx_hash = client.send_transaction(tx_data)
+    print(f"Transaction sent! Hash: {tx_hash}")
+
+
+
+
+
