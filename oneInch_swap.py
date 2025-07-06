@@ -1,14 +1,11 @@
 import json
 
 import requests
-from web3 import Web3
 from eth_account import Account
+from web3 import Web3
 
 import K1inch
 from CHAIN_ID import ETHERIUM, POLYGON
-
-
-
 
 
 class OneInchClient:
@@ -26,6 +23,7 @@ class OneInchClient:
             raise Exception("Failed to connect to Polygon RPC")
 
         self.account = Account.from_key(private_key) if private_key else None
+        print("Wallet Address:", self.account.address)
 
     def get_token_address(self, symbol):
         url = f"{self.base_url}/tokens"
@@ -61,9 +59,11 @@ class OneInchClient:
             "fromTokenAddress": Web3.to_checksum_address(from_token),
             "toTokenAddress": Web3.to_checksum_address(to_token),
             "amount": str(amount_wei),
+            "excludeProtocols": "UNISWAP_V2",
             "fromAddress": self.account.address,
-            "slippage": 1,
-            "disableEstimate": "true"
+            "slippage": 2,
+            "disableEstimate": "false",
+            # "disableEstimate": "true"
         }
         response = requests.get(url, headers=self.headers, params=params)
         if not response.ok:
@@ -79,8 +79,8 @@ class OneInchClient:
         tx_data["nonce"] = self.web3.eth.get_transaction_count(self.account.address)
         tx_data["gasPrice"] = self.web3.eth.gas_price
         tx_data["value"] = int(tx_data["value"])
-        #tx_data["gas"] = int(tx_data.get("gas", 250000))  # Default fallback
-        tx_data["gas"] = self.estimate_gas()
+        # tx_data["gas"] = int(tx_data.get("gas", 250000))  # Default fallback
+        tx_data = self.estimate_gas(tx_data)
 
         signed_tx = self.account.sign_transaction(tx_data)
         print("Transaction data:")
@@ -88,24 +88,38 @@ class OneInchClient:
         tx_hash = self.web3.eth.send_raw_transaction(signed_tx.raw_transaction)
         return self.web3.to_hex(tx_hash)
 
-    def estimate_gas(self):
-        # Estimate gas (important!)
+    def estimate_gas(self, tx_data):
         try:
-            estimated_gas = self.web3.eth.estimate_gas({
+            # Print account balance for context
+            balance = self.web3.eth.get_balance(self.account.address)
+            balance_eth = self.web3.from_wei(balance, "ether")
+            print(f"Balance: {balance_eth} tokens")
+
+            # Estimate gas with a minimal tx dict
+            estimate = self.web3.eth.estimate_gas({
                 "from": tx_data["from"],
                 "to": tx_data["to"],
                 "value": tx_data.get("value", 0),
                 "data": tx_data["data"]
             })
-            tx_data["gas"] = int(estimated_gas * 1.2)  # add 20% buffer
+
+            buffered = int(estimate * 1.2)
+            print(f"Estimated gas: {estimate} → Using with 20% buffer: {buffered}")
+            tx_data["gas"] = buffered
+            return tx_data
+
         except Exception as e:
-            print(f"Gas estimation failed: {e}")
-            return None
+            print("❌ Gas estimation failed.")
+            print("Possible causes:")
+            print("  - Insufficient balance")
+            print("  - Reverting swap (e.g. invalid token route)")
+            print("  - Incorrect calldata")
+            print(f"Error: {e}")
+            raise e
 
 
 # 🔁 Example usage
 if __name__ == "__main__":
-
     # Create client for Polygon
     client = OneInchClient(chain_id=POLYGON, private_key=K1inch.PRIVATE_KEY, api_key=K1inch.API_KEY)
 
@@ -124,11 +138,5 @@ if __name__ == "__main__":
 
     tx_data = client.build_swap_tx(from_token, to_token, amount_wei)
 
-
     tx_hash = client.send_transaction(tx_data)
     print(f"Transaction sent! Hash: {tx_hash}")
-
-
-
-
-
