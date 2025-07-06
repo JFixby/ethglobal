@@ -126,7 +126,7 @@ if __name__ == "__main__":
     # Swap MATIC to USDC
     from_symbol = "MATIC"
     to_symbol = "USDC"
-    amount_matic = 1
+    amount_matic = 0.001
 
     from_token = client.get_token_address(from_symbol)
     to_token = client.get_token_address(to_symbol)
