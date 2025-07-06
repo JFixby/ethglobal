@@ -3,6 +3,7 @@ import json
 import requests
 
 import K1inch
+from CHAIN_ID import ETHERIUM
 
 
 def get_chain_id():
@@ -21,7 +22,7 @@ def get_chain_id():
     print(response.json())
 
 def fetch_tokens():
-    CHAIN_ID = 1  # Ethereum Mainnet
+    CHAIN_ID = ETHERIUM  # Ethereum Mainnet
     BASE_URL = f"https://api.1inch.dev/swap/v6.1/{CHAIN_ID}"
     TOKEN_LIST_URL = f"{BASE_URL}/tokens"
 

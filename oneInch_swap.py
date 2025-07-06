@@ -5,10 +5,14 @@ from web3 import Web3
 from eth_account import Account
 
 import K1inch
+from CHAIN_ID import ETHERIUM, POLYGON
+
+
+
 
 
 class OneInchClient:
-    def __init__(self, chain_id=137, private_key=None, api_key=None):
+    def __init__(self, chain_id=ETHERIUM, private_key=None, api_key=None):
         self.chain_id = chain_id
         self.base_url = f"https://api.1inch.dev/swap/v6.1/{chain_id}"
         self.headers = {
@@ -64,15 +68,19 @@ class OneInchClient:
         response = requests.get(url, headers=self.headers, params=params)
         if not response.ok:
             raise Exception(f"Failed to build swap tx: {response.status_code} {response.text}")
-        return response.json()["tx"]
+        response = response.json()["tx"]
+        response["chainId"] = self.chain_id
+        return response
 
     def send_transaction(self, tx_data):
+        # tx_data['chainId'] = chainId
         tx_data["from"] = Web3.to_checksum_address(tx_data["from"])
         tx_data["to"] = Web3.to_checksum_address(tx_data["to"])
         tx_data["nonce"] = self.web3.eth.get_transaction_count(self.account.address)
         tx_data["gasPrice"] = self.web3.eth.gas_price
         tx_data["value"] = int(tx_data["value"])
-        tx_data["gas"] = int(tx_data.get("gas", 250000))  # Default fallback
+        #tx_data["gas"] = int(tx_data.get("gas", 250000))  # Default fallback
+        tx_data["gas"] = self.estimate_gas()
 
         signed_tx = self.account.sign_transaction(tx_data)
         print("Transaction data:")
@@ -80,12 +88,26 @@ class OneInchClient:
         tx_hash = self.web3.eth.send_raw_transaction(signed_tx.raw_transaction)
         return self.web3.to_hex(tx_hash)
 
+    def estimate_gas(self):
+        # Estimate gas (important!)
+        try:
+            estimated_gas = self.web3.eth.estimate_gas({
+                "from": tx_data["from"],
+                "to": tx_data["to"],
+                "value": tx_data.get("value", 0),
+                "data": tx_data["data"]
+            })
+            tx_data["gas"] = int(estimated_gas * 1.2)  # add 20% buffer
+        except Exception as e:
+            print(f"Gas estimation failed: {e}")
+            return None
+
 
 # 🔁 Example usage
 if __name__ == "__main__":
 
     # Create client for Polygon
-    client = OneInchClient(chain_id=137, private_key=K1inch.PRIVATE_KEY, api_key=K1inch.API_KEY)
+    client = OneInchClient(chain_id=POLYGON, private_key=K1inch.PRIVATE_KEY, api_key=K1inch.API_KEY)
 
     # Swap MATIC to USDC
     from_symbol = "MATIC"
